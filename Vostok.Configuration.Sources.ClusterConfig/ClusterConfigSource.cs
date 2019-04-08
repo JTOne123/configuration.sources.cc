@@ -52,6 +52,8 @@ namespace Vostok.Configuration.Sources.ClusterConfig
 
         private static IEnumerable<ISettingsNodeConverter> SelectConverters(ClusterConfigSourceSettings settings)
         {
+            yield return new ObjectNodeUnwrapper();
+            
             if (settings.SplitMultiLevelKeys)
                 yield return new MultiLevelKeysSplitter();
 

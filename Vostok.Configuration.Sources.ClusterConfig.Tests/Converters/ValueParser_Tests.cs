@@ -21,18 +21,6 @@ namespace Vostok.Configuration.Sources.ClusterConfig.Tests.Converters
 
             converter = new ValueParser(parser);
         }
-        
-        [Test]
-        public void Should_parse_ObjectNode_with_single_child()
-        {
-            var original = Object("name", Value("", "value"));
-
-            var parsed = converter.Convert(original);
-
-            var expected = Object("name", Value("xx", "parsed"));
-
-            parsed.Should().Be(expected);
-        }
 
         [Test]
         public void Should_parse_single_ValueNode()
