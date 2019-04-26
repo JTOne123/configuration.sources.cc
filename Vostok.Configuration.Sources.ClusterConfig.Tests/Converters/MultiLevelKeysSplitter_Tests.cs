@@ -128,5 +128,49 @@ namespace Vostok.Configuration.Sources.ClusterConfig.Tests.Converters
 
             splitter.Convert(node).Should().Be(expectedResult);
         }
+
+        [Test]
+        public void Should_handle_long_names_with_common_prefixes_before_dot_in_objects()
+        {
+            var node = Object(
+                Value("a.b.c", "1"),
+                Value("a.b.d", "2"),
+                Value("a.e", "3")
+            );
+
+            splitter.NeedToConvert(node).Should().BeTrue();
+
+            splitter.Convert(node).Should().Be(Object(
+                Object("a", 
+                    Value("e", "3"),
+                    Object("b", 
+                        Value("c", "1"), 
+                        Value("d", "2"))
+                    )
+                )
+            );
+        }
+
+        [Test]
+        public void Should_handle_long_names_with_common_prefixes_before_dot_in_arrays()
+        {
+            var node = Array(
+                Value("a.b.c", "1"),
+                Value("a.b.d", "2"),
+                Value("a.e", "3")
+            );
+
+            splitter.NeedToConvert(node).Should().BeTrue();
+
+            splitter.Convert(node).Should().Be(Array(
+                    Object("a",
+                        Object("b",
+                            Value("c", "1"),
+                            Value("d", "2")),
+                        Value("e", "3")
+                    )
+                )
+            );
+        }
     }
 }

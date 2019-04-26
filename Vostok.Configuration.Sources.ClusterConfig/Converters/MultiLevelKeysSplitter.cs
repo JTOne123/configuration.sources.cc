@@ -48,30 +48,28 @@ namespace Vostok.Configuration.Sources.ClusterConfig.Converters
         private static List<ISettingsNode> MergeRedundantObjectNodes(IEnumerable<ISettingsNode> nodes)
         {
             var result = new List<ISettingsNode>();
-            var builders = new Dictionary<string, ObjectNodeBuilder>(StringComparer.OrdinalIgnoreCase);
+            var lists = new Dictionary<string, List<ISettingsNode>>(StringComparer.OrdinalIgnoreCase);
             var positions = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
 
             foreach (var node in nodes)
             {
                 if (node is ObjectNode objectNode && node.Name != null && objectNode.ChildrenCount == 1)
                 {
-                    if (builders.TryGetValue(node.Name, out var builder))
+                    if (!lists.TryGetValue(node.Name, out var list))
                     {
-                        builder.SetChild(objectNode.Children.Single());
-                    }
-                    else
-                    {
-                        builders[node.Name] = objectNode.ToBuilder();
+                        lists[node.Name] = list = new List<ISettingsNode>();
                         positions[node.Name] = result.Count;
                         result.Add(node);
                     }
+
+                    list.Add(objectNode.Children.Single());
                 }
                 else result.Add(node);
             }
 
             foreach (var pair in positions)
             {
-                result[pair.Value] = builders[pair.Key].Build();
+                result[pair.Value] = new ObjectNode(pair.Key, MergeRedundantObjectNodes(lists[pair.Key]));
             }
 
             return result;
