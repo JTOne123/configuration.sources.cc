@@ -59,6 +59,10 @@ namespace Vostok.Configuration.Sources.ClusterConfig
 
             if (settings.ValuesParser != null)
                 yield return new ValueParser(settings.ValuesParser);
+
+            if (settings.ConditionalValuesParsers != null)
+                foreach (var (parser, condition) in settings.ConditionalValuesParsers)
+                    yield return new ValueParser(parser, condition);
         }
     }
 }

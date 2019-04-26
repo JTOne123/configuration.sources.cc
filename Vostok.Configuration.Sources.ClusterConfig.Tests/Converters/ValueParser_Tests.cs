@@ -1,7 +1,5 @@
-using System;
 using FluentAssertions;
 using NUnit.Framework;
-using Vostok.Configuration.Abstractions.SettingsTree;
 using Vostok.Configuration.Sources.ClusterConfig.Converters;
 using Vostok.Configuration.Sources.ClusterConfig.Tests.Helpers;
 
@@ -10,7 +8,7 @@ namespace Vostok.Configuration.Sources.ClusterConfig.Tests.Converters
     [TestFixture]
     internal class ValueParser_Tests : TreeConstructionSet
     {
-        private Func<string, string, ISettingsNode> parser;
+        private ValueNodeParser parser;
         private ValueParser converter;
 
         [SetUp]
@@ -31,6 +29,18 @@ namespace Vostok.Configuration.Sources.ClusterConfig.Tests.Converters
             var expected = Object("x", Value("xx", "parsed"));
 
             parsed.Should().Be(expected);
+        }
+
+        [Test]
+        public void Should_not_parse_when_condition_does_not_hold()
+        {
+            converter = new ValueParser(parser, _ => false);
+
+            var original = Value("x", "y");
+
+            var parsed = converter.Convert(original);
+
+            parsed.Should().BeSameAs(original);
         }
 
         [Test]

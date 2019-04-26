@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using JetBrains.Annotations;
 using Vostok.ClusterConfig.Client.Abstractions;
 using Vostok.Configuration.Abstractions.SettingsTree;
@@ -42,6 +43,12 @@ namespace Vostok.Configuration.Sources.ClusterConfig
         /// <para>Second string argument is resulting root node's name (can be <c>null</c>).</para>
         /// </summary>
         [CanBeNull]
-        public Func<string, string, ISettingsNode> ValuesParser { get; set; }
+        public ValueNodeParser ValuesParser { get; set; }
+
+        /// <summary>
+        /// Same as <see cref="ValuesParser"/>, but applied only when specified condition holds on encountered <see cref="ValueNode"/>.
+        /// </summary>
+        [CanBeNull]
+        public IList<(ValueNodeParser, ValueNodeCondition)> ConditionalValuesParsers { get; set; }
     }
 }
