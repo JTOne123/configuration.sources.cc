@@ -23,7 +23,10 @@ namespace Vostok.Configuration.Sources.ClusterConfig.Tests.Converters
         public void Should_leave_ValueNode_untouched_when_there_are_no_separators_in_name(string name)
         {
             var node = Value(name, "value");
-            splitter.Convert(node).Should().BeSameAs(node);
+
+            splitter.NeedToConvert(node).Should().BeFalse();
+
+            splitter.Convert(node).Should().Be(node);
         }
 
         [TestCase(null)]
@@ -32,7 +35,10 @@ namespace Vostok.Configuration.Sources.ClusterConfig.Tests.Converters
         public void Should_leave_ArrayNode_untouched_when_no_separators_in_name(string name)
         {
             var node = Array(name, "value1", "value2");
-            splitter.Convert(node).Should().BeSameAs(node);
+
+            splitter.NeedToConvert(node).Should().BeFalse();
+
+            splitter.Convert(node).Should().Be(node);
         }
 
         [TestCase(null)]
@@ -41,7 +47,10 @@ namespace Vostok.Configuration.Sources.ClusterConfig.Tests.Converters
         public void Should_leave_ObjectNode_untouched_when_no_separators_in_name(string name)
         {
             var node = Object(name, ("key1", "value1"), ("key2", "value2"));
-            splitter.Convert(node).Should().BeSameAs(node);
+
+            splitter.NeedToConvert(node).Should().BeFalse();
+
+            splitter.Convert(node).Should().Be(node);
         }
 
         [Test]
@@ -52,13 +61,18 @@ namespace Vostok.Configuration.Sources.ClusterConfig.Tests.Converters
                 Object("ts.settings.shared", ("k2", "v2")),
                 Array("name.with.dots", Value("1"), Value("2")));
 
-            splitter.Convert(node).Should().BeSameAs(node);
+            splitter.NeedToConvert(node).Should().BeFalse();
+
+            splitter.Convert(node).Should().Be(node);
         }
 
         [Test]
         public void Should_create_tree_when_ValueNode_has_separators_in_name()
         {
             var node = new ValueNode("a.b.c", "value");
+
+            splitter.NeedToConvert(node).Should().BeTrue();
+
             splitter.Convert(node).Should().Be(Object("a", Object("b", Value("c", "value"))));
         }
         
@@ -66,6 +80,8 @@ namespace Vostok.Configuration.Sources.ClusterConfig.Tests.Converters
         public void Should_work_recursively()
         {
             var node = Object("a.b", Array("c.d", Value("e.f", "value"), Value("e.g", "value2")));
+
+            splitter.NeedToConvert(node).Should().BeTrue();
 
             splitter.Convert(node)
                 .Should()
@@ -90,6 +106,8 @@ namespace Vostok.Configuration.Sources.ClusterConfig.Tests.Converters
                         Value("f", "5")),
                     Value("key", "6")));
 
+            splitter.NeedToConvert(node).Should().BeTrue();
+
             splitter.Convert(node).Should().Be(expectedResult);
         }
 
@@ -105,6 +123,8 @@ namespace Vostok.Configuration.Sources.ClusterConfig.Tests.Converters
                 Object("a", Value("b", "1")),
                 Object(null as string, Value("x1", "y1")),
                 Object(null as string, Value("x2", "y2")));
+
+            splitter.NeedToConvert(node).Should().BeTrue();
 
             splitter.Convert(node).Should().Be(expectedResult);
         }

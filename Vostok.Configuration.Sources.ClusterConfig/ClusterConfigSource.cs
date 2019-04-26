@@ -47,7 +47,7 @@ namespace Vostok.Configuration.Sources.ClusterConfig
         public IObservable<(ISettingsNode settings, Exception error)> Observe() =>
             client
                 .Observe(Prefix)
-                .Select(settings => converters.Aggregate(settings, (s, converter) => converter.Convert(s)))
+                .Select(settings => converters.Aggregate(settings, (s, converter) => converter.NeedToConvert(s) ? converter.Convert(s) : s))
                 .Select(settings => (settings, null as Exception));
 
         private static IEnumerable<ISettingsNodeConverter> SelectConverters(ClusterConfigSourceSettings settings)

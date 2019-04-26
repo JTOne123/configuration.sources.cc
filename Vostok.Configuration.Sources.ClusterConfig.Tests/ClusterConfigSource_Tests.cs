@@ -25,6 +25,9 @@ namespace Vostok.Configuration.Sources.ClusterConfig.Tests
         {
             client = Substitute.For<IClusterConfigClient>();
             converters = Enumerable.Range(0, 2).Select(_ => Substitute.For<ISettingsNodeConverter>()).ToArray();
+
+            foreach (var converter in converters)
+                converter.NeedToConvert(null).ReturnsForAnyArgs(true);
             
             source = new ClusterConfigSource(client, Prefix, converters);
         }
@@ -62,6 +65,23 @@ namespace Vostok.Configuration.Sources.ClusterConfig.Tests
             var value = source.Observe().WaitFirstValue(100.Milliseconds());
             value.settings.Should().BeSameAs(nodes[2]);
             value.error.Should().BeNull();
+        }
+
+        [Test]
+        public void Should_skip_converters_that_do_not_need_to_convert_the_node()
+        {
+            var nodes = Enumerable.Range(0, 2).Select(_ => Substitute.For<ISettingsNode>()).ToArray();
+
+            client.Observe(Prefix).Returns(Observable.Return(nodes[0]));
+
+            converters[0].NeedToConvert(nodes[0]).Returns(false);
+            converters[1].Convert(nodes[0]).Returns(nodes[1]);
+
+            var value = source.Observe().WaitFirstValue(100.Milliseconds());
+            value.settings.Should().BeSameAs(nodes[1]);
+            value.error.Should().BeNull();
+
+            converters[0].DidNotReceiveWithAnyArgs().Convert(null);
         }
 
         [Test]

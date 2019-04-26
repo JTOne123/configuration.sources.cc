@@ -6,6 +6,8 @@ namespace Vostok.Configuration.Sources.ClusterConfig.Converters
 {
     internal class ObjectNodeUnwrapper : ISettingsNodeConverter
     {
+        public bool NeedToConvert(ISettingsNode settings) => true;
+
         public ISettingsNode Convert(ISettingsNode node)
         {
             switch (node)

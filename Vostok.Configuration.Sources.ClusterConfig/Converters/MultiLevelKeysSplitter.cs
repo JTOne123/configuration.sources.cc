@@ -11,15 +11,10 @@ namespace Vostok.Configuration.Sources.ClusterConfig.Converters
     {
         private const char Separator = '.';
 
+        public bool NeedToConvert(ISettingsNode settings) 
+            => EnumerateAllValueNodeNames(settings).Any(name => name.Contains(Separator));
+
         public ISettingsNode Convert(ISettingsNode node)
-        {
-            if (!EnumerateAllValueNodeNames(node).Any(name => name.Contains(Separator)))
-                return node;
-
-            return ConvertInternal(node);
-        }
-
-        private static ISettingsNode ConvertInternal(ISettingsNode node)
         {
             switch (node)
             {
@@ -27,17 +22,17 @@ namespace Vostok.Configuration.Sources.ClusterConfig.Converters
                     if (valueNode.Name == null || !valueNode.Name.Contains(Separator))
                         return valueNode;
 
-                    var nameParts = valueNode.Name.Split(new[] {Separator}, StringSplitOptions.RemoveEmptyEntries);
+                    var nameParts = valueNode.Name.Split(new[] { Separator }, StringSplitOptions.RemoveEmptyEntries);
                     if (nameParts.Length == 1)
                         return valueNode;
 
                     return TreeFactory.CreateTreeByMultiLevelKey(nameParts[0], nameParts.Skip(1).ToArray(), valueNode.Value);
 
                 case ArrayNode arrayNode:
-                    return new ArrayNode(arrayNode.Name, MergeRedundantObjectNodes(arrayNode.Children.Select(ConvertInternal)));
+                    return new ArrayNode(arrayNode.Name, MergeRedundantObjectNodes(arrayNode.Children.Select(Convert)));
 
                 case ObjectNode objectNode:
-                    return new ObjectNode(objectNode.Name, MergeRedundantObjectNodes(objectNode.Children.Select(ConvertInternal)));
+                    return new ObjectNode(objectNode.Name, MergeRedundantObjectNodes(objectNode.Children.Select(Convert)));
 
                 default:
                     return node;

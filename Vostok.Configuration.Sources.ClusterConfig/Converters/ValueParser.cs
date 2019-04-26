@@ -13,6 +13,8 @@ namespace Vostok.Configuration.Sources.ClusterConfig.Converters
             this.parse = parse;
         }
 
+        public bool NeedToConvert(ISettingsNode settings) => true;
+
         public ISettingsNode Convert(ISettingsNode node)
         {
             switch (node)
