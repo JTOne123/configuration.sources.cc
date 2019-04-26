@@ -41,6 +41,16 @@ namespace Vostok.Configuration.Sources.ClusterConfig.Tests.Converters
             splitter.Convert(node).Should().Be(node);
         }
 
+        [Test]
+        public void Should_leave_ArrayNode_untouched_when_it_has_children_other_than_value_nodes()
+        {
+            var node = Array("a.b.c", Array("another-array", "1", "2"));
+
+            splitter.NeedToConvert(node).Should().BeFalse();
+
+            splitter.Convert(node).Should().Be(node);
+        }
+
         [TestCase(null)]
         [TestCase("")]
         [TestCase("key")]
@@ -54,12 +64,12 @@ namespace Vostok.Configuration.Sources.ClusterConfig.Tests.Converters
         }
 
         [Test]
-        public void Should_leave_an_arbitrary_hierarchy_of_nodes_untouched_if_there_are_no_separators_in_value_node_names()
+        public void Should_leave_an_arbitrary_hierarchy_of_nodes_untouched_if_there_are_no_separators_in_value_or_array_node_names()
         {
             var node = Object("zebra", 
                 Object("master.settings.shared", ("k", "v")),
                 Object("ts.settings.shared", ("k2", "v2")),
-                Array("name.with.dots", Value("1"), Value("2")));
+                Array("sequence", Value("1"), Value("2"), Object("obj", ("k3", "v3"))));
 
             splitter.NeedToConvert(node).Should().BeFalse();
 
@@ -75,7 +85,17 @@ namespace Vostok.Configuration.Sources.ClusterConfig.Tests.Converters
 
             splitter.Convert(node).Should().Be(Object("a", Object("b", Value("c", "value"))));
         }
-        
+
+        [Test]
+        public void Should_create_tree_when_ArrayNode_has_separators_in_name()
+        {
+            var node = Array("a.b.c", Value("1"), Value("2"));
+
+            splitter.NeedToConvert(node).Should().BeTrue();
+
+            splitter.Convert(node).Should().Be(Object("a", Object("b", Array("c", Value("1"), Value("2")))));
+        }
+
         [Test]
         public void Should_work_recursively()
         {
@@ -85,7 +105,12 @@ namespace Vostok.Configuration.Sources.ClusterConfig.Tests.Converters
 
             splitter.Convert(node)
                 .Should()
-                .Be(Object("a.b", Array("c.d", Object("e", Value("f", "value"), Value("g", "value2")))));
+                .Be(Object("a.b", 
+                        Object("c", 
+                            Array("d",
+                                Object("e",
+                                    Value("f", "value"),
+                                    Value("g", "value2"))))));
         }
 
         [Test]

@@ -32,7 +32,7 @@ namespace Vostok.Configuration.Sources.ClusterConfig
         public string Prefix { get; }
 
         /// <summary>
-        /// If set to <c>true</c>, <see cref="ClusterConfigSource"/> will split <see cref="ValueNode"/>s with keys containing dots (such as <c>a.b.c</c>) into a hierarchy of <see cref="ObjectNode"/>s.
+        /// If set to <c>true</c>, <see cref="ClusterConfigSource"/> will split <see cref="ValueNode"/>s and <see cref="ArrayNode"/>s with keys containing dots (such as <c>a.b.c</c>) into a hierarchy of <see cref="ObjectNode"/>s.
         /// </summary>
         public bool SplitMultiLevelKeys { get; set; } = true;
 
