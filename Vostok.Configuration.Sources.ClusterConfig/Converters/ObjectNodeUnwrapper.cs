@@ -6,7 +6,8 @@ namespace Vostok.Configuration.Sources.ClusterConfig.Converters
 {
     internal class ObjectNodeUnwrapper : ISettingsNodeConverter
     {
-        public bool NeedToConvert(ISettingsNode settings) => true;
+        public bool NeedToConvert(ISettingsNode settings) 
+            => NodeTreeEnumerator.EnumerateTree(settings).Any(IsRedundantObjectNode);
 
         public ISettingsNode Convert(ISettingsNode node)
         {
@@ -19,7 +20,7 @@ namespace Vostok.Configuration.Sources.ClusterConfig.Converters
                     return new ArrayNode(arrayNode.Name, arrayNode.Children.Select(Convert).ToArray());
 
                 case ObjectNode objectNode:
-                    if (objectNode.ChildrenCount == 1 && string.IsNullOrEmpty(objectNode.Children.Single().Name))
+                    if (IsRedundantObjectNode(objectNode))
                         return objectNode.Children.Single().WithName(objectNode.Name);
 
                     return new ObjectNode(objectNode.Name, objectNode.Children.Select(Convert));
@@ -29,6 +30,9 @@ namespace Vostok.Configuration.Sources.ClusterConfig.Converters
             }
         }
 
-        
+        private static bool IsRedundantObjectNode(ISettingsNode node)
+            => node is ObjectNode objectNode &&
+               objectNode.ChildrenCount == 1 &&
+               string.IsNullOrEmpty(objectNode.Children.Single().Name);
     }
 }

@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using JetBrains.Annotations;
 using Vostok.Configuration.Abstractions.SettingsTree;
+using Vostok.Configuration.Sources.ClusterConfig.Helpers;
 using Vostok.Configuration.Sources.SettingsTree;
 
 namespace Vostok.Configuration.Sources.ClusterConfig.Converters
@@ -11,8 +11,12 @@ namespace Vostok.Configuration.Sources.ClusterConfig.Converters
     {
         private const char Separator = '.';
 
-        public bool NeedToConvert(ISettingsNode settings) 
-            => EnumerateAllValueNodeNames(settings).Any(name => name.Contains(Separator));
+        public bool NeedToConvert(ISettingsNode settings)
+            => NodeTreeEnumerator.EnumerateTree(settings)
+                .Where(node => node is ValueNode)
+                .Where(node => node.Name != null)
+                .Select(node => node.Name)
+                .Any(name => name.Contains(Separator));
 
         public ISettingsNode Convert(ISettingsNode node)
         {
@@ -22,7 +26,7 @@ namespace Vostok.Configuration.Sources.ClusterConfig.Converters
                     if (valueNode.Name == null || !valueNode.Name.Contains(Separator))
                         return valueNode;
 
-                    var nameParts = valueNode.Name.Split(new[] { Separator }, StringSplitOptions.RemoveEmptyEntries);
+                    var nameParts = valueNode.Name.Split(new[] {Separator}, StringSplitOptions.RemoveEmptyEntries);
                     if (nameParts.Length == 1)
                         return valueNode;
 
@@ -36,26 +40,6 @@ namespace Vostok.Configuration.Sources.ClusterConfig.Converters
 
                 default:
                     return node;
-            }
-        }
-
-        private static IEnumerable<string> EnumerateAllValueNodeNames([CanBeNull] ISettingsNode startingNode)
-        {
-            var queue = new Queue<ISettingsNode>();
-
-            queue.Enqueue(startingNode);
-
-            while (queue.Count > 0)
-            {
-                var node = queue.Dequeue();
-                if (node == null)
-                    continue;
-
-                if (node is ValueNode && node.Name != null)
-                    yield return node.Name;
-
-                foreach (var child in node.Children)
-                    queue.Enqueue(child);
             }
         }
 
@@ -73,7 +57,7 @@ namespace Vostok.Configuration.Sources.ClusterConfig.Converters
                 {
                     if (builders.TryGetValue(node.Name, out var builder))
                     {
-                       builder.SetChild(objectNode.Children.Single());
+                        builder.SetChild(objectNode.Children.Single());
                     }
                     else
                     {

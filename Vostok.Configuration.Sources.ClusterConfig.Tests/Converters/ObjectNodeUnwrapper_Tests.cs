@@ -14,7 +14,9 @@ namespace Vostok.Configuration.Sources.ClusterConfig.Tests.Converters
         public void Should_unwrap_ObjectNode_with_single_child()
         {
             var original = Object("key", Array("", "a", "b"));
-            
+
+            converter.NeedToConvert(original).Should().BeTrue();
+
             var converted = converter.Convert(original);
             
             var expected = Array("key", "a", "b");
@@ -23,17 +25,50 @@ namespace Vostok.Configuration.Sources.ClusterConfig.Tests.Converters
         }
 
         [Test]
+        public void Should_leave_null_unchanged()
+        {
+            converter.NeedToConvert(null).Should().BeFalse();
+        }
+
+        [Test]
         public void Should_leave_ValueNode_unchanged()
         {
-            var value = Value("value");
-            converter.Convert(value).Should().Be(value);
+            var node = Value("value");
+
+            converter.NeedToConvert(node).Should().BeFalse();
+        }
+
+        [Test]
+        public void Should_leave_ArrayNode_unchanged()
+        {
+            var node = Array(null as string, Value("", "value"));
+
+            converter.NeedToConvert(node).Should().BeFalse();
+        }
+
+        [Test]
+        public void Should_leave_ObjectNode_with_single_named_child_unchanged()
+        {
+            var node = Object(null as string, Value("a", "b"));
+
+            converter.NeedToConvert(node).Should().BeFalse();
+        }
+
+        [Test]
+        public void Should_leave_ObjectNode_with_multiple_children_unchanged()
+        {
+            var node = Object(null as string, Value("a", "b"), Value("", "c"));
+
+            converter.NeedToConvert(node).Should().BeFalse();
         }
 
         [Test]
         public void Should_convert_ArrayNode_recursively()
         {
             var original = Array(Value("value1"), Object(Value("", "value2")));
-            
+
+            converter.NeedToConvert(original).Should().BeTrue();
+
             var converted = converter.Convert(original);
 
             var expected = Array(Value("value1"), Value("value2"));
@@ -45,7 +80,9 @@ namespace Vostok.Configuration.Sources.ClusterConfig.Tests.Converters
         public void Should_convert_ObjectNode_recursively()
         {
             var original = Object(Value("key1", "value1"), Object("key2", Value("", "value2")));
-            
+
+            converter.NeedToConvert(original).Should().BeTrue();
+
             var converted = converter.Convert(original);
 
             var expected = Object(Value("key1", "value1"), Value("key2", "value2"));
