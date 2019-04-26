@@ -3,7 +3,8 @@ using Vostok.Configuration.Abstractions.SettingsTree;
 
 namespace Vostok.Configuration.Sources.ClusterConfig.Converters
 {
-    internal interface ISettingsNodeConverter
+    [PublicAPI]
+    public interface ISettingsNodeConverter
     {
         bool NeedToConvert([CanBeNull] ISettingsNode settings);
 

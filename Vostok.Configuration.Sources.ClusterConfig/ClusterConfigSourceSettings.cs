@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using JetBrains.Annotations;
 using Vostok.ClusterConfig.Client.Abstractions;
 using Vostok.Configuration.Abstractions.SettingsTree;
+using Vostok.Configuration.Sources.ClusterConfig.Converters;
 
 namespace Vostok.Configuration.Sources.ClusterConfig
 {
@@ -50,5 +51,11 @@ namespace Vostok.Configuration.Sources.ClusterConfig
         /// </summary>
         [CanBeNull]
         public IList<(ValueNodeParser, ValueNodeCondition)> ConditionalValuesParsers { get; set; }
+
+        /// <summary>
+        /// Extension point for custom arbitrary node converters.
+        /// </summary>
+        [CanBeNull]
+        public IList<ISettingsNodeConverter> CustomConverters { get; set; }
     }
 }
