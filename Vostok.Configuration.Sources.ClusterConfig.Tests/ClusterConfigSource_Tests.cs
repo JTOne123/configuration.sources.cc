@@ -83,17 +83,5 @@ namespace Vostok.Configuration.Sources.ClusterConfig.Tests
 
             converters[0].DidNotReceiveWithAnyArgs().Convert(null);
         }
-
-        [Test]
-        public void Should_have_efficient_scopeto_method()
-        {
-            source = source.ScopeTo("suffix");
-
-            source.Prefix.Should().Be("prefix/suffix");
-
-            source = source.ScopeTo("foo", "bar");
-
-            source.Prefix.Should().Be("prefix/suffix/foo/bar");
-        }
     }
 }

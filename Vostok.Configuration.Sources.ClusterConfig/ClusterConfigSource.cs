@@ -37,11 +37,8 @@ namespace Vostok.Configuration.Sources.ClusterConfig
 
         public string Prefix { get; }
 
-        public ClusterConfigSource ScopeTo(params string[] scope)
-            => ScopeTo(string.Join("/", scope));
-
-        public ClusterConfigSource ScopeTo(string innerPrefix)
-            => new ClusterConfigSource(client, $"{Prefix.TrimEnd('/')}/{innerPrefix.TrimStart('/')}", converters);
+        public IConfigurationSource ScopeTo(string path)
+            => this.ScopeTo(path.Split(new [] {'/'}, StringSplitOptions.RemoveEmptyEntries));
 
         /// <inheritdoc />
         public IObservable<(ISettingsNode settings, Exception error)> Observe() =>
