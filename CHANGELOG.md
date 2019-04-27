@@ -1,3 +1,7 @@
+## 0.1.5 (27-04-2019):
+
+Fixed https://github.com/vostok/configuration.sources.cc/issues/2. Had to remove efficient `ScopeTo` method for the sake of correctness.
+
 ## 0.1.4 (26-04-2019):
 
 * Fixed a bug introduced in 0.1.3 that could lead to splitting of file names that contain dots.
