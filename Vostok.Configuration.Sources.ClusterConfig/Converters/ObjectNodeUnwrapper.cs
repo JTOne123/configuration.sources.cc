@@ -6,7 +6,7 @@ namespace Vostok.Configuration.Sources.ClusterConfig.Converters
 {
     internal class ObjectNodeUnwrapper : ISettingsNodeConverter
     {
-        public bool NeedToConvert(ISettingsNode settings) 
+        public bool NeedToConvert(ISettingsNode settings)
             => NodeTreeEnumerator.EnumerateTree(settings).Any(IsRedundantObjectNode);
 
         public ISettingsNode Convert(ISettingsNode node)
@@ -21,7 +21,14 @@ namespace Vostok.Configuration.Sources.ClusterConfig.Converters
 
                 case ObjectNode objectNode:
                     if (IsRedundantObjectNode(objectNode))
+                    {
+                        var singleChild = objectNode.Children.Single();
+                        //Make no difference between empty and nonexistent file.
+                        if (string.IsNullOrEmpty(singleChild.Value) && !singleChild.Children.Any())
+                            return new ObjectNode(objectNode.Name);
+
                         return objectNode.Children.Single().WithName(objectNode.Name);
+                    }
 
                     return new ObjectNode(objectNode.Name, objectNode.Children.Select(Convert));
 

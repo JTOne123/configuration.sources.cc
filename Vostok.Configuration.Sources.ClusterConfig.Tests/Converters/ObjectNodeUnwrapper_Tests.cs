@@ -1,5 +1,6 @@
 using FluentAssertions;
 using NUnit.Framework;
+using Vostok.Configuration.Abstractions.SettingsTree;
 using Vostok.Configuration.Sources.ClusterConfig.Converters;
 using Vostok.Configuration.Sources.ClusterConfig.Tests.Helpers;
 
@@ -18,7 +19,7 @@ namespace Vostok.Configuration.Sources.ClusterConfig.Tests.Converters
             converter.NeedToConvert(original).Should().BeTrue();
 
             var converted = converter.Convert(original);
-            
+
             var expected = Array("key", "a", "b");
 
             converted.Should().Be(expected);
@@ -86,6 +87,48 @@ namespace Vostok.Configuration.Sources.ClusterConfig.Tests.Converters
             var converted = converter.Convert(original);
 
             var expected = Object(Value("key1", "value1"), Value("key2", "value2"));
+
+            converted.Should().Be(expected);
+        }
+
+        [Test]
+        public void Should_convert_ObjectNode_with_empty_value_node_to_ObjectNode_without_value_on_nesting_level_1()
+        {
+            var original = Object("key1", Value("", ""));
+
+            converter.NeedToConvert(original).Should().BeTrue();
+
+            var converted = converter.Convert(original);
+
+            var expected = new ObjectNode("key1");
+
+            converted.Should().Be(expected);
+        }
+
+        [Test]
+        public void Should_convert_ObjectNode_with_empty_value_node_to_ObjectNode_without_value_on_nesting_level_2()
+        {
+            var original = Object("key1", Object("key2", Value("", "")));
+
+            converter.NeedToConvert(original).Should().BeTrue();
+
+            var converted = converter.Convert(original);
+
+            var expected = Object("key1", new ObjectNode("key2"));
+
+            converted.Should().Be(expected);
+        }
+
+        [Test]
+        public void Should_convert_ObjectNode_with_empty_value_node_to_ObjectNode_without_value_on_nesting_level_2_with_correct_neighbor()
+        {
+            var original = Object(Value("key1", "value1"), Object("key2", Value("", "")));
+
+            converter.NeedToConvert(original).Should().BeTrue();
+
+            var converted = converter.Convert(original);
+
+            var expected = Object(Value("key1", "value1"), new ObjectNode("key2"));
 
             converted.Should().Be(expected);
         }
