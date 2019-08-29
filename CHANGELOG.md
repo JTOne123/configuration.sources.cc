@@ -1,3 +1,7 @@
+## 0.1.6 (29-08-2019):
+
+Make no difference between empty and nonexistent file.
+
 ## 0.1.5 (27-04-2019):
 
 Fixed https://github.com/vostok/configuration.sources.cc/issues/2. Had to remove efficient `ScopeTo` method for the sake of correctness.
